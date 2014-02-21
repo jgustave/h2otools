@@ -8,5 +8,144 @@
     <artifactId>h2otools</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    
+
+    <properties>
+      <maven.compiler.source>1.7</maven.compiler.source>
+      <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+
+    <repositories>
+
+        <!--<repository>-->
+            <!--<id>releases</id>-->
+            <!--<name>Releases</name>-->
+            <!--<url>https://oss.sonatype.org/content/repositories/releases</url>-->
+        <!--</repository>-->
+
+        <repository>
+            <id>maven apache snapshots</id>
+            <name>maven apache snapshots</name>
+            <url>http://repository.apache.org/snapshots/</url>
+            <layout>default</layout>
+        </repository>
+
+        <repository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net Repository for Maven</name>
+            <url>http://download.java.net/maven/2/</url>
+            <layout>default</layout>
+        </repository>
+
+
+        <!--mvn install:install-file -Dfile=./lib/hadoop-lzo-0.4.17.jar -DgroupId=hadoop-lzo -DartifactId=hadoop-lzo -Dversion=0.4.17 -Dpackaging=jar -DlocalRepositoryPath=./repo-->
+          <!--<repository>-->
+            <!--<id>local-repo</id>-->
+            <!--<url>file://${basedir}/repo</url>-->
+          <!--</repository>-->
+
+
+
+
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>Codehaus Snapshots</id>
+            <url>http://snapshots.repository.codehaus.org/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+
+
+    <dependencies>
+
+
+       <dependency>
+       	<groupId>org.apache.commons</groupId>
+       	<artifactId>commons-math3</artifactId>
+       	<version>3.3-SNAPSHOT</version>
+       </dependency>
+
+        <dependency>
+        	<groupId>org.slf4j</groupId>
+        	<artifactId>slf4j-log4j12</artifactId>
+        	<version>1.7.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+        	<groupId>log4j</groupId>
+        	<artifactId>log4j</artifactId>
+        	<version>1.2.16</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+<!--#############################################################################################      -->
+      <!--TEST DEPENDENCIES ARE ONLY PACKAGED AND USED WITH UNIT TESTS-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
+            <scope>test</scope>
+            <!--<classifier>tests</classifier>-->
+        </dependency>
+
+
+  </dependencies>
+
+    <build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <finalName>test</finalName>
+                  <transformers>
+                    <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+                      <!--<mainClass>jd.DcTest</mainClass>-->
+                    <!--</transformer>-->
+                  </transformers>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+              </execution>
+            </executions>
+        </plugin>
+
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.4.3</version>
+        <configuration>
+                <argLine>-Xms1024m -Xmx1024m -ea</argLine>
+                <testFailureIgnore>false</testFailureIgnore>
+                <useSystemClassLoader>true</useSystemClassLoader>
+                <forkMode>always</forkMode>
+        </configuration>
+    </plugin>
+
+
+    </plugins>
+  </build>
+
+
 </project>
