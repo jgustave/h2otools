@@ -66,6 +66,7 @@
         	<groupId>h2o</groupId>
         	<artifactId>h2o</artifactId>
         	<version>0.0.1.jd</version>
+            <scope>provided</scope>
         </dependency>
 
        <dependency>
