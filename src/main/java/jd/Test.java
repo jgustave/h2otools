@@ -8,7 +8,7 @@ import static water.TestUtil.loadAndParseFile;
 /**
  * Just a proof of concept to launch some work as a Java App.
  * You need to either compile in to one single jar and use that everywhere, or
- * compile this in a separate jar 
+ * compile this in a separate jar
  *
  * --start cluster
  * java -jar h2o-0.0.1.jd.jar
@@ -23,6 +23,7 @@ public class Test {
         Boot.main(Test.class,args);
     }
 
+    @SuppressWarnings ("unused")
     public static void userMain(String[] args) {
         System.out.println("User");
         H2O.main(new String[]{});
