@@ -36,14 +36,13 @@
             <layout>default</layout>
         </repository>
 
-
-        <!--mvn install:install-file -Dfile=./lib/hadoop-lzo-0.4.17.jar -DgroupId=hadoop-lzo -DartifactId=hadoop-lzo -Dversion=0.4.17 -Dpackaging=jar -DlocalRepositoryPath=./repo-->
-          <!--<repository>-->
-            <!--<id>local-repo</id>-->
-            <!--<url>file://${basedir}/repo</url>-->
-          <!--</repository>-->
+          <repository>
+            <id>local-repo</id>
+            <url>file://${basedir}/repo</url>
+          </repository>
 
 
+        <!--mvn install:install-file -Dfile=./lib/h2o.jar -DgroupId=h2o -DartifactId=h2o -Dversion=0.0.1.jd -Dpackaging=jar -DlocalRepositoryPath=./repo-->
 
 
     </repositories>
@@ -63,6 +62,11 @@
 
     <dependencies>
 
+        <dependency>
+        	<groupId>h2o</groupId>
+        	<artifactId>h2o</artifactId>
+        	<version>0.0.1.jd</version>
+        </dependency>
 
        <dependency>
        	<groupId>org.apache.commons</groupId>
