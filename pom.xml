@@ -10,8 +10,8 @@
 
 
     <properties>
-      <maven.compiler.source>1.7</maven.compiler.source>
-      <maven.compiler.target>1.7</maven.compiler.target>
+      <maven.compiler.source>1.6</maven.compiler.source>
+      <maven.compiler.target>1.6</maven.compiler.target>
     </properties>
 
     <repositories>
@@ -35,6 +35,13 @@
             <url>http://download.java.net/maven/2/</url>
             <layout>default</layout>
         </repository>
+
+        <!--<repository>-->
+            <!--<id>mapr-releases</id>-->
+            <!--<url>http://repository.mapr.com/maven/</url>-->
+            <!--<snapshots><enabled>false</enabled></snapshots>-->
+            <!--<releases><enabled>true</enabled></releases>-->
+        <!--</repository>-->
 
           <repository>
             <id>local-repo</id>
@@ -61,12 +68,26 @@
 
 
     <dependencies>
+        <dependency>
+        	<groupId>org.apache.hadoop</groupId>
+        	<artifactId>hadoop-common</artifactId>
+        	<version>2.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--<dependency>-->
+        	<!--<groupId>org.apache.hadoop</groupId>-->
+        	<!--<artifactId>hadoop-core</artifactId>-->
+        	<!--<version>1.0.3-mapr-3.0.2</version>-->
+            <!--<scope>provided</scope>-->
+        <!--</dependency>-->
+
 
         <dependency>
         	<groupId>h2o</groupId>
         	<artifactId>h2o</artifactId>
         	<version>0.0.1.jd</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
 
        <dependency>

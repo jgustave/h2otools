@@ -4,11 +4,11 @@ import hex.FrameTask;
 import hex.glm.GLM2;
 import hex.glm.GLMModel;
 import hex.glm.GLMParams;
+
 import water.*;
-import water.fvec.Frame;
-import water.fvec.NFSFileVec;
-import water.fvec.ParseDataset2;
-import water.fvec.Vec;
+import water.api.Constants;
+import water.fvec.*;
+import water.persist.PersistHdfs;
 import water.util.Log;
 
 
@@ -16,7 +16,10 @@ import java.io.File;
 import java.util.*;
 
 import static java.util.Arrays.asList;
-import static water.TestUtil.loadAndParseFile;
+//import static water.TestUtil.loadAndParseFile;
+//import org.apache.hadoop.fs.FileStatus;
+//import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 /**
  * Just a proof of concept to launch some work as a Java App.
@@ -28,6 +31,12 @@ import static water.TestUtil.loadAndParseFile;
  *
  * --start job.
  * java -cp /Users/jerdavis/devhome/h2otools/repo/h2o/h2o/0.0.1.jd/h2o-0.0.1.jd.jar:/Users/jerdavis/devhome/h2otools/target/h2otools.jar jd.Test
+ *
+ * hadoop classpath
+ * export JD = 'hadoop classpath'
+ * (To get MapR etc)
+ * java -cp $JD:./h2o.jar:./h2otools.jar jd.Test /tmp/jd/hdfstest
+ *
  */
 public class Test {
 
@@ -71,21 +80,36 @@ public class Test {
 
         logOff();
 
-        foo();
-        //bar();
+        hdfsLoadTest(args[0]);
 
-//
-//
-//        try {
-//            Key k = loadAndParseFile("test.hex","/Users/jerdavis/devhome/h2o.jd/smalldata/cars.csv");
-//
-//            ValueArray ary = DKV.get(k).get();
-//            System.out.println(ary);
-//        }catch(Exception e ) {
-//            throw new RuntimeException(e);
-//        }
 
     }
+
+
+    private static void hdfsLoadTest(String path) {
+        System.out.println("Loading HDFS from:[" + path + "]" );
+        try {
+            Key               outputKey   = Key.make();
+            ArrayList<String> succ        = new ArrayList<String>();
+            ArrayList<String> fail        = new ArrayList<String>();
+
+            PersistHdfs.addFolder2(new Path(path), succ, fail);
+            System.out.println("Success:" + succ.size() + " Fail:" + fail.size() );
+
+            Key[] sourceKeys = new Key[succ.size()];
+            for( int x=0;x<succ.size();x++) {
+                sourceKeys[x] = Key.make(succ.get(x));
+            }
+
+            Frame fr         = ParseDataset2.parse(outputKey, sourceKeys);
+
+            System.out.println("" + fr );
+        }catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
     private static void foo() {
 
@@ -97,7 +121,7 @@ public class Test {
 
 
         //List<Frame> uniFrames = getUniFrames(parsed, "/Users/jerdavis/devhome/h2o.jd/smalldata/cars.csv", new HashSet<String>(asList("name")), response);
-        List<Frame> uniFrames = getUniFrames(parsed, "/Users/jerdavis/temp/pbdtc/part-00101.gz", new HashSet<String>(asList("subject","date","is_responder","sales")), response);
+        List<Frame>  uniFrames = getUniFrames(parsed, "/Users/jerdavis/temp/pbdtc/part-00101.gz", new HashSet<String>(asList("subject","date","is_responder","sales")), response);
         List<GLM2>   glmTasks  = new ArrayList<GLM2>();
         List<String> names     = new ArrayList<String>();
         System.out.println("Got:" + uniFrames.size() + " Univariate Frames");
