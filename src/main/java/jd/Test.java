@@ -6,7 +6,6 @@ import hex.glm.GLMModel;
 import hex.glm.GLMParams;
 
 import water.*;
-import water.api.Constants;
 import water.fvec.*;
 import water.persist.PersistHdfs;
 import water.util.Log;
@@ -16,9 +15,6 @@ import java.io.File;
 import java.util.*;
 
 import static java.util.Arrays.asList;
-//import static water.TestUtil.loadAndParseFile;
-//import org.apache.hadoop.fs.FileStatus;
-//import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 /**
@@ -38,6 +34,7 @@ import org.apache.hadoop.fs.Path;
  * java -cp $JD:./h2o.jar:./h2otools.jar jd.Test /tmp/jd/hdfstest
  *
  */
+@SuppressWarnings ("unused")
 public class Test {
 
     public static void main(String[] args) throws Exception {
@@ -73,20 +70,26 @@ public class Test {
 
         logOff();
 
-        H2O.main(new String[]{});
+        H2O.main(new String[]{"-name","uniqueId","-nthreads","2","-port","54555"});
         System.out.println("User2");
         H2O.waitForCloudSize(1,-1);
         System.out.println("User3");
 
         logOff();
 
-        hdfsLoadTest(args[0]);
+        Frame fr = hdfsLoadTest(args[0]);
+        //b_pb_ca_wa_tset,b_pb_ca_wa_iett,b_pb_ca_wa_ietmt,b_pb_ca_wa_ietst
+        SubResult result = doUni(fr,"is_purchase","b_pb_ca_wa_iett");
+        System.out.println(result);
 
-
+//TODO: remove original keys?
+//        DKV.remove(Job.LIST);         // Remove all keys
+//        DKV.remove(Log.LOG_KEY);
+//        DKV.write_barrier();
     }
 
 
-    private static void hdfsLoadTest(String path) {
+    private static Frame hdfsLoadTest(String path) {
         System.out.println("Loading HDFS from:[" + path + "]" );
         try {
             Key               outputKey   = Key.make();
@@ -101,15 +104,52 @@ public class Test {
                 sourceKeys[x] = Key.make(succ.get(x));
             }
 
-            Frame fr         = ParseDataset2.parse(outputKey, sourceKeys);
-
-            System.out.println("" + fr );
+            return( ParseDataset2.parse(outputKey, sourceKeys));
         }catch(Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private static SubResult doUni(Frame inputFrame,
+                                   String responseName,
+                                   String predictorName) {
+        Map<String,Vec> vecMap = getVecMap(inputFrame);
 
+        Frame workFrame = new Frame(new String[]{predictorName,responseName},
+                                    new Vec[]{vecMap.get(predictorName),
+                                              vecMap.get(responseName)} );
+
+        Key jobKey   = Key.make();
+        Key modelKey = Key.make();
+        FrameTask.DataInfo dinfo = new FrameTask.DataInfo(workFrame,
+                                                          1,
+                                                          true);
+
+        GLMParams glm = new GLMParams( GLMParams.Family.gaussian,
+                                       0,
+                                       GLMParams.Family.gaussian.defaultLink,
+                                       0 );
+
+        GLM2 glmTask = new GLM2("Univar test",
+                     jobKey,
+                     modelKey,
+                     dinfo,
+                     glm,
+                     new double[]{0},0).fork();
+
+
+        GLMModel model = glmTask.get();
+        SubResult subResult = new SubResult(predictorName,
+                                            model.beta()[1],
+                                            model.beta()[0],
+                                            model.norm_beta()[1],
+                                            model.norm_beta()[0],
+                                            model.aic(),
+                                            model.auc(),
+                                            model.devExplained()
+        );
+        return( subResult );
+    }
 
     private static void foo() {
 
