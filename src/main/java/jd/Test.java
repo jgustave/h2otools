@@ -70,22 +70,89 @@ public class Test {
 
         logOff();
 
-        H2O.main(new String[]{"-name","uniqueId","-nthreads","2","-port","54555"});
+        H2O.main(new String[]{"-name","uniqueId","-nthreads","2","-port","-1"});
         System.out.println("User2");
         H2O.waitForCloudSize(1,-1);
         System.out.println("User3");
 
         logOff();
 
-        Frame fr = hdfsLoadTest(args[0]);
-        //b_pb_ca_wa_tset,b_pb_ca_wa_iett,b_pb_ca_wa_ietmt,b_pb_ca_wa_ietst
-        SubResult result = doUni(fr,"is_purchase","b_pb_ca_wa_iett");
-        System.out.println(result);
+//        Frame fr = hdfsLoadTest(args[0]);
+//        //b_pb_ca_wa_tset,b_pb_ca_wa_iett,b_pb_ca_wa_ietmt,b_pb_ca_wa_ietst
+//        SubResult result = doUni(fr,"is_purchase","b_pb_ca_wa_iett");
+//        System.out.println(result);
 
 //TODO: remove original keys?
 //        DKV.remove(Job.LIST);         // Remove all keys
 //        DKV.remove(Log.LOG_KEY);
 //        DKV.write_barrier();
+
+        largeDirectLoadTest();
+
+    }
+
+    public static void directLoadTest() {
+        String data = "response,predictor\n"+
+                      "0,1\n"+
+                      "1,1\n"+
+                      "0,2\n"+
+                      "1,3\n";
+
+        Key rawBytesKey = FVecTest.makeByteVec(Key.make().toString(),
+                                               data);
+        Key frameKey  = Key.make();
+        Frame fr = ParseDataset2.parse(frameKey, new Key[]{rawBytesKey});
+        DKV.remove(rawBytesKey);
+
+        System.out.println(fr);
+
+        SubResult subResult = doUni(fr,"response","predictor");
+        System.out.println(subResult);
+    }
+
+    public static void largeDirectLoadTest() {
+        Random rand = new Random();
+        StringBuilder builder = new StringBuilder();
+        String header = "response,predictor\n";
+        Key rawBytesKey = null;
+        List<Key> rawKeys = new ArrayList<Key>();
+
+        System.out.println("Loading");
+
+        //15 chunks of 1M rows.
+        for( int x=0;x<15;x++) {
+            builder.append(header);
+            System.out.print(".");
+
+            //1Million rows at a time
+            for( int y=0;y<1000000;y++) {
+
+                boolean response = rand.nextBoolean();
+                builder.append((response ? "1" : "0") + "," + (response ? (10 + rand.nextDouble()) : rand.nextDouble()) + "\n");
+            }
+            System.out.print("-");
+            rawBytesKey = Key.make();
+            FVecTest.makeByteVec(rawBytesKey,
+                                 builder.toString() );
+            rawKeys.add(rawBytesKey);
+            builder.setLength(0);
+        }
+        System.out.println("Loaded");
+        builder = null;
+
+
+
+        Key   frameKey  = Key.make();
+        Frame fr        = ParseDataset2.parse(frameKey, rawKeys.toArray(new Key[0]));
+
+        for(Key key : rawKeys ) {
+            DKV.remove(key);
+        }
+
+        System.out.println(fr);
+
+        SubResult subResult = doUni(fr,"response","predictor");
+        System.out.println(subResult);
     }
 
 
